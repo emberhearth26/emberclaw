@@ -32,12 +32,16 @@ export class TwitchClientManager {
       });
 
       await authProvider
-        .addUserForToken({
-          accessToken: normalizedToken,
-          refreshToken: account.refreshToken ?? null,
-          expiresIn: account.expiresIn ?? null,
-          obtainmentTimestamp: account.obtainmentTimestamp ?? Date.now(),
-        })
+        .addUserForToken(
+          {
+            accessToken: normalizedToken,
+            refreshToken: account.refreshToken ?? null,
+            expiresIn: account.expiresIn ?? null,
+            obtainmentTimestamp: account.obtainmentTimestamp ?? Date.now(),
+            scope: ["chat:read", "chat:edit"],
+          },
+          ["chat"],
+        )
         .then((userId) => {
           this.logger.info(
             `Added user ${userId} to RefreshingAuthProvider for ${account.username}`,
