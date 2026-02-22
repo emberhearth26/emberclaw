@@ -31,8 +31,8 @@ export class TwitchClientManager {
         clientSecret: account.clientSecret,
       });
 
-      await authProvider
-        .addUserForToken(
+      try {
+        const userId = await authProvider.addUserForToken(
           {
             accessToken: normalizedToken,
             refreshToken: account.refreshToken ?? null,
@@ -41,17 +41,14 @@ export class TwitchClientManager {
             scope: ["chat:read", "chat:edit"],
           },
           ["chat"],
-        )
-        .then((userId) => {
-          this.logger.info(
-            `Added user ${userId} to RefreshingAuthProvider for ${account.username}`,
-          );
-        })
-        .catch((err) => {
-          this.logger.error(
-            `Failed to add user to RefreshingAuthProvider: ${err instanceof Error ? err.message : String(err)}`,
-          );
-        });
+        );
+        this.logger.info(`Added user ${userId} to RefreshingAuthProvider for ${account.username}`);
+      } catch (err) {
+        this.logger.error(
+          `Failed to add user to RefreshingAuthProvider: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        throw err;
+      }
 
       authProvider.onRefresh((userId, token) => {
         this.logger.info(
@@ -148,7 +145,7 @@ export class TwitchClientManager {
 
     this.setupClientHandlers(client, account);
 
-    client.connect();
+    await client.connect();
 
     this.clients.set(key, client);
     this.logger.info(`Connected to Twitch as ${account.username}`);

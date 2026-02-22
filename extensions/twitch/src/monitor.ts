@@ -269,5 +269,14 @@ export async function monitorTwitchProvider(
 
   abortSignal.addEventListener("abort", stop, { once: true });
 
+  // Wait until aborted - the gateway expects this promise to stay pending while connected
+  await new Promise<void>((resolve) => {
+    if (abortSignal.aborted) {
+      resolve();
+      return;
+    }
+    abortSignal.addEventListener("abort", () => resolve(), { once: true });
+  });
+
   return { stop };
 }
