@@ -272,7 +272,12 @@ export function buildEmbeddedRunPayloads(params: {
         params.lastToolError.meta ? [params.lastToolError.meta] : undefined,
         { markdown: useMarkdown },
       );
-      const errorSuffix = params.lastToolError.error ? `: ${params.lastToolError.error}` : "";
+      const verboseErrorDetailsEnabled =
+        params.verboseLevel === "on" || params.verboseLevel === "full";
+      const errorSuffix =
+        verboseErrorDetailsEnabled && params.lastToolError.error
+          ? `: ${params.lastToolError.error}`
+          : "";
       const warningText = `⚠️ ${toolSummary} failed${errorSuffix}`;
       const normalizedWarning = normalizeTextForComparison(warningText);
       const duplicateWarning = normalizedWarning
@@ -294,7 +299,7 @@ export function buildEmbeddedRunPayloads(params: {
   }
 
   const hasAudioAsVoiceTag = replyItems.some((item) => item.audioAsVoice);
-  return replyItems
+  const payloads = replyItems
     .map((item) => ({
       text: item.text?.trim() ? item.text.trim() : undefined,
       mediaUrls: item.media?.length ? item.media : undefined,
@@ -314,4 +319,13 @@ export function buildEmbeddedRunPayloads(params: {
       }
       return true;
     });
+  if (
+    payloads.length === 0 &&
+    params.toolMetas.length > 0 &&
+    !params.lastToolError &&
+    !lastAssistantErrored
+  ) {
+    return [{ text: "✅ Done." }];
+  }
+  return payloads;
 }
