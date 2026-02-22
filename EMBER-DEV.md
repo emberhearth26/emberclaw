@@ -5,9 +5,9 @@
 ### Current Setup
 
 - **Source:** `/Users/emberhearth/Documents/GitHub/emberclaw`
-- **State:** `~/.openclaw` (unchanged from original OpenClaw)
+- **State:** `~/.emberclaw` (isolated from original OpenClaw)
 - **Port:** 18789
-- **Version:** 2026.2.20
+- **Version:** 2026.2.22
 
 ### Running Modes
 
@@ -73,26 +73,33 @@ pnpm build                # Rebuild
 | origin   | github.com/emberhearth26/emberclaw | Our fork         |
 | upstream | github.com/openclaw/openclaw       | Original project |
 
-### Sync with upstream
+### Sync with Upstream (IMPORTANT!)
+
+**Always sync before making changes to avoid conflicts!**
 
 ```bash
-git fetch upstream
-git merge upstream/main
-# Resolve conflicts if any
-git push origin main
+git fetch upstream                          # Get latest from OpenClaw
+git merge upstream/main -m "Sync upstream"  # Merge into emberclaw
+pnpm install                                # Update deps (may install new packages)
+pnpm build                                  # Rebuild (check for errors!)
+git push origin main                        # Push synced state to GitHub
+# Restart gateway to pick up changes
 ```
+
+**After a big sync:** Build errors may occur if new features require new dependencies.
+Fix with `pnpm add -w @package-name` then rebuild.
 
 ---
 
 ## Logs
 
 - **Dev mode:** Terminal output
-- **Daemon mode:** `~/.openclaw/logs/gateway.log`
-- **Errors:** `~/.openclaw/logs/gateway.err.log`
+- **Daemon mode:** `~/.emberclaw/logs/gateway.log`
+- **Errors:** `~/.emberclaw/logs/gateway.err.log`
 
 ```bash
 # Tail daemon logs:
-tail -f ~/.openclaw/logs/gateway.log
+tail -f ~/.emberclaw/logs/gateway.log
 ```
 
 ---
@@ -116,7 +123,7 @@ kill $(lsof -t -i :18789)
 launchctl list | grep openclaw
 
 # View errors:
-cat ~/.openclaw/logs/gateway.err.log
+cat ~/.emberclaw/logs/gateway.err.log
 ```
 
 ### Reset to packaged OpenClaw
